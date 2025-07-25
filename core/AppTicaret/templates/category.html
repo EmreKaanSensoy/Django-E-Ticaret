@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load humanize %}
+
+{% block content %}
+<div class="container" style="padding: 150px 0;">
+    <div class="row">
+        <!-- Sol Panel (Filtreler) -->
+        <div class="col-3">
+            <form method="get">
+                <div class="accordion" id="accordionPanelsStayOpenExample">
+                    
+                    <!-- MARKALAR -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#brands" aria-expanded="true">
+                                {% trans 'Markalar' %}
+                            </button>
+                        </h2>
+                        <div id="brands" class="accordion-collapse collapse show">
+                            <div class="accordion-body">
+                                {% for brand in brands %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="brand" value="{{ brand.brand }}" id="brand{{ forloop.counter }}">
+                                    <label class="form-check-label" for="brand{{ forloop.counter }}">
+                                        {{ brand.brand }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RENKLER -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#colors" aria-expanded="false">
+                                {% trans 'Renkler' %}
+                            </button>
+                        </h2>
+                        <div id="colors" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                {% for color in colors %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="color" value="{{ color.color }}" id="color{{ forloop.counter }}">
+                                    <label class="form-check-label" for="color{{ forloop.counter }}">
+                                        {{ color.color }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- KASA ŞEKİLLERİ -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#caseShapes" aria-expanded="false">
+                                {% trans 'Kasa Şekilleri' %}
+                            </button>
+                        </h2>
+                        <div id="caseShapes" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                {% for case_shape in case_shapes %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="case_shape" value="{{ case_shape.case_shape }}" id="caseShape{{ forloop.counter }}">
+                                    <label class="form-check-label" for="caseShape{{ forloop.counter }}">
+                                        {{ case_shape.case_shape }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KAYIŞ TİPLERİ -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#strapTypes" aria-expanded="false">
+                                {% trans 'Kayış Tipleri' %}
+                            </button>
+                        </h2>
+                        <div id="strapTypes" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                {% for strap_type in strap_types %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="strap_type" value="{{ strap_type.strap_type }}" id="strapType{{ forloop.counter }}">
+                                    <label class="form-check-label" for="strapType{{ forloop.counter }}">
+                                        {{ strap_type.strap_type }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CAM ÖZELLİĞİ -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#glassFeatures" aria-expanded="false">
+                                {% trans 'Cam Özellikleri' %}
+                            </button>
+                        </h2>
+                        <div id="glassFeatures" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                {% for glass_feature in glass_features %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="glass_feature" value="{{ glass_feature.glass_feature }}" id="glassFeature{{ forloop.counter }}">
+                                    <label class="form-check-label" for="glassFeature{{ forloop.counter }}">
+                                        {{ glass_feature.glass_feature }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STİLLER -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#styles" aria-expanded="false">
+                                {% trans 'Stiller' %}
+                            </button>
+                        </h2>
+                        <div id="styles" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                {% for style in styles %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="style" value="{{ style.style }}" id="style{{ forloop.counter }}">
+                                    <label class="form-check-label" for="style{{ forloop.counter }}">
+                                        {{ style.style }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MEKANİZMALAR -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#mechanisms" aria-expanded="false">
+                                {% trans 'Mekanizmalar' %}
+                            </button>
+                        </h2>
+                        <div id="mechanisms" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                {% for mechanism in mechanisms %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="mechanism" value="{{ mechanism.mechanism }}" id="mechanism{{ forloop.counter }}">
+                                    <label class="form-check-label" for="mechanism{{ forloop.counter }}">
+                                        {{ mechanism.mechanism }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fiyat -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#prices" aria-expanded="false">
+                                {% trans 'Fiyat Aralığı' %}
+                            </button>
+                        </h2>
+                        <div id="prices" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="mb-3">
+                                    <label for="min_price" class="form-label">{% trans 'Minimum Fiyat' %}</label>
+                                    <input type="number" class="form-control" name="min_price" id="min_price" placeholder="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="max_price" class="form-label">{% trans 'Maksimum Fiyat' %}</label>
+                                    <input type="number" class="form-control" name="max_price" id="max_price" placeholder="100000">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <!-- Butonlar -->
+                <button type="submit" class="btn btn-primary d-block w-100 mt-3">{% trans 'Filtrele' %}</button>
+                <a href="{% url 'category' %}" class="btn btn-danger d-block w-100 mt-2">{% trans 'Temizle' %}</a>
+            </form>
+        </div>
+
+        <!-- Sağ Panel (Ürünler) -->
+        <div class="col-9">
+            <div class="row">
+                {% for product in products %}
+                <div class="col-4 mb-4">
+                    <div class="card" style="width: 100%;">
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.model }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.brand }}</h5>
+                            <p class="card-text">{{ product.model }}</p>
+                            <p class="card-text">{{ product.price|intcomma }} ₺</p>
+                            <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary w-100">{% trans 'Detaya Git' %}</a>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" value="{{ product.id }}" name="product_id">
+                                <button type="submit" class="btn btn-primary">{% trans 'Sepete Ekle' %}</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p>{% trans 'Hiç ürün bulunamadı.' %}</p>
+                {% endfor %}
+            </div>
+            <!-- Pagination-->
+            <div class="row ">
+                <nav aria-label="..." class="d-flex justify-content-center mt-5">
+                    <ul class="pagination">
+
+                        {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{products.previous_page_number}}">{% trans 'Önceki' %}</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{products.number|add:-1}}">{{products.number|add:-1}}</a>
+                        </li> 
+
+                        {% endif %}
+
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link" href="?page={{products.number}}">{{products.number}}</a>
+                        </li>
+
+                        {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{products.number|add:1}}">{{products.number|add:1}}</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{products.next_page_number}}">{% trans 'Sonraki' %}</a>
+                        </li>
+                        {% endif %}
+
+                    </ul>
+                  </nav>
+            </div>
+        </div>
+        
+         
+    </div>
+</div>
+{% endblock content %}
+
+{% block extrajs %}
+<script>
+
+            $(document).ready(function() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // ✅ Marka Filtresi
+        const selectedBrandIds = urlParams.getAll('brand');
+        if (selectedBrandIds.length > 0) {
+            $.each(selectedBrandIds, function(index, brand) {
+                const checkboxInput = $(`input[name="brand"][value="${brand}"]`);
+                if (checkboxInput.length > 0) {
+                    checkboxInput.prop("checked", true);
+                }
+            });
+        }
+
+        // ✅ Renk Filtresi
+        const selectedColorIds = urlParams.getAll('color');
+        if (selectedColorIds.length > 0) {
+            $.each(selectedColorIds, function(index, color) {
+                const checkboxInput = $(`input[name="color"][value="${color}"]`);
+                if (checkboxInput.length > 0) {
+                    checkboxInput.prop("checked", true);
+                }
+            });
+        }
+
+        // ✅ Kasa Şekli Filtresi
+        const selectedCaseShapeIds = urlParams.getAll('case_shape');
+        if (selectedCaseShapeIds.length > 0) {
+            $.each(selectedCaseShapeIds, function(index, caseShape) {
+                const checkboxInput = $(`input[name="case_shape"][value="${caseShape}"]`);
+                if (checkboxInput.length > 0) {
+                    checkboxInput.prop("checked", true);
+                }
+            });
+        }
+
+        // ✅ Kayış Tipi Filtresi
+        const selectedStrapTypeIds = urlParams.getAll('strap_type');
+        if (selectedStrapTypeIds.length > 0) {
+            $.each(selectedStrapTypeIds, function(index, strapType) {
+                const checkboxInput = $(`input[name="strap_type"][value="${strapType}"]`);
+                if (checkboxInput.length > 0) {
+                    checkboxInput.prop("checked", true);
+                }
+            });
+        }
+
+        // ✅ Cam Özellik Filtresi
+        const selectedGlassFeatureIds = urlParams.getAll('glass_feature');
+        if (selectedGlassFeatureIds.length > 0) {
+            $.each(selectedGlassFeatureIds, function(index, glassFeature) {
+                const checkboxInput = $(`input[name="glass_feature"][value="${glassFeature}"]`);
+                if (checkboxInput.length > 0) {
+                    checkboxInput.prop("checked", true);
+                }
+            });
+        }
+
+        // ✅ Stil Filtresi
+        const selectedStyleIds = urlParams.getAll('style');
+        if (selectedStyleIds.length > 0) {
+            $.each(selectedStyleIds, function(index, style) {
+                const checkboxInput = $(`input[name="style"][value="${style}"]`);
+                if (checkboxInput.length > 0) {
+                    checkboxInput.prop("checked", true);
+                }
+            });
+        }
+
+        // ✅ Mekanizma Filtresi
+        const selectedMechanismIds = urlParams.getAll('mechanism');
+        if (selectedMechanismIds.length > 0) {
+            $.each(selectedMechanismIds, function(index, mechanism) {
+                const checkboxInput = $(`input[name="mechanism"][value="${mechanism}"]`);
+                if (checkboxInput.length > 0) {
+                    checkboxInput.prop("checked", true);
+                }
+            });
+        }
+
+        // ✅ Fiyat Aralığı
+        const selectedMinPrice = urlParams.get('min_price');
+        const selectedMaxPrice = urlParams.get('max_price');
+        if (selectedMinPrice) {
+            $('#min_price').val(selectedMinPrice);
+        }
+        if (selectedMaxPrice) {
+            $('#max_price').val(selectedMaxPrice);
+        }
+
+        // ✅ Accordion Durumu LocalStorage ile Kaydet & Geri Yükle
+        const accordionItems = $(".accordion .accordion-collapse");
+
+        accordionItems.each(function() {
+            const id = $(this).attr('id');
+            const isOpen = localStorage.getItem(id);
+            if (isOpen === 'true') {
+                $(this).addClass('show');
+            }
+        });
+
+        $(".accordion-button").on("click", function() {
+            const targetId = $(this).attr("data-bs-target").replace("#", "");
+            const isOpen = $("#" + targetId).hasClass("show");
+            localStorage.setItem(targetId, !isOpen);
+        });
+    });
+
+
+</script>
+
+{% endblock extrajs %}

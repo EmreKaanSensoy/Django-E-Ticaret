@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load humanize %}
+
+{% block content %}
+<div class="container" style="padding: 250px 0;">
+    <div class="row">
+        {% if cart_products|length == 0 %}
+        <div class="d-flex justify-content-between alert-warning" role="alert">
+            <p class="text-dark">Sepetinizde Ürün Bulunmamaktadır!</p>
+            <a href="{% url 'category' %}" class="btn btn-primary"> Alışverişe Başla </a>
+
+        {% else %}
+        <table class="table table-bordered align-middle caption-top text-center">
+            <caption class="fs-1 text-start">{% trans 'Sepetiniz' %}</caption>
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">{% trans 'Ürün' %}</th>
+                    <th scope="col">{% trans 'Marka' %}</th>
+                    <th scope="col">{% trans 'Model' %}</th>
+                    <th scope="col">{% trans 'Fiyat' %}</th>
+                    <th scope="col">{% trans 'Adet' %}</th>
+                    <th scope="col">{% trans 'Sil' %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in cart_products %}
+                <tr>
+                    <!-- Ürün Görseli -->
+                    <td class="text-center">
+                        <img src="{{ product.product.image.url }}" alt="Ürün" width="80" class="img-fluid rounded">
+                    </td>
+                    
+                    <!-- Marka -->
+                    <td>{{ product.product.brand }}</td>
+                    
+                    <!-- Model -->
+                    <td>{{ product.product.model }}</td>
+                    
+                    <!-- Fiyat -->
+                    <td>{{ product.product.price|floatformat:2 }} ₺</td>
+                    
+                    <!-- Adet -->
+                    <td>
+                        <form method="post" class="d-flex align-items-center" style="gap: 0.5rem;">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="number" name="quantity" value="{{ product.quantity }}" min="1" style="width: 60px;" class="form-control form-control-sm" />
+                            <button type="submit" name="update_quantity" value="1" class="btn btn-secondary btn-sm">Güncelle</button>
+                        </form>
+                    </td>
+                    
+                    <!-- Sil Butonu -->
+                    <td>
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" value="{{ product.id }}" name="product_id">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% endif %}
+    </div>
+    <div class="row g-4 justify-content-end mt-5">
+            <div class="col-8"></div>
+            <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
+                <div class="bg-light rounded">
+                    <div class="p-4">
+                        <h1 class="display-6 mb-4">Sipariş Özeti</span></h1>
+                        <div class="d-flex justify-content-between mb-4">
+                            <h5 class="mb-0 me-4">Ürün Toplam :</h5>
+                            <p class="mb-0 text-dark">₺{{ product_total_price }}</p>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <h5 class="mb-0 me-4">Kargo :</h5>
+                            <div class="">
+                                <p class="mb-0 text-dark">₺{{ cargo }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
+                        <h5 class="mb-0 ps-4 me-4">Toplam</h5>
+                        <p class="mb-0 pe-4 text-dark">₺{{ total_price|intcomma }}</p>
+                    </div>
+
+                        <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="submit" name="btncheck" value="checkbtn">Sepeti Onayla</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock content %}

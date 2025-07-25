@@ -1,0 +1,157 @@
+{% load static %}
+{% load i18n %}
+
+
+<header id="header" class="site-header header-scrolled position-fixed text-black bg-light">
+    <nav id="header-nav" class="navbar navbar-expand-lg px-3 mb-3">
+        <div class="container-fluid">
+            <!-- Logo -->
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <img src="{% static 'images/main-logo.png' %}" class="logo">
+            </a>
+
+            <!-- Mobil Menü Açma Butonu -->
+            <button class="navbar-toggler d-flex d-lg-none order-3 p-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#bdNavbar" aria-controls="bdNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <svg class="navbar-icon">
+                    <use xlink:href="#navbar-icon"></use>
+                </svg>
+            </button>
+
+            <!-- Menü İçeriği -->
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="bdNavbar" aria-labelledby="bdNavbarOffcanvasLabel">
+                <div class="offcanvas-header px-4 pb-0">
+                    <a class="navbar-brand" href="{% url 'index' %}">
+                        <img src="{% static 'images/main-logo.png' %}" class="logo">
+                    </a>
+                    <button type="button" class="btn-close btn-close-black" data-bs-dismiss="offcanvas" aria-label="Close" data-bs-target="#bdNavbar"></button>
+                </div>
+
+                <div class="offcanvas-body">
+                    <ul id="navbar" class="navbar-nav text-uppercase justify-content-end align-items-center flex-grow-1 pe-3">
+                        {% if request.path == '/' %}
+                        <!-- Menü Linkleri -->
+                        <li class="nav-item">
+                            <a class="nav-link me-4 {% if request.path == '/' %}active{% endif %}" href="#billboard">{% trans 'Ana Sayfa' %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '2' %}active{% endif %}" href="#woman-watches">{% trans 'Kadın Saat' %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '1' %}active{% endif %}" href="#man-watches">{% trans 'Erkek Saat' %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '3' %}active{% endif %}" href="#yearly-sale">{% trans 'Çocuk Saat' %}</a>
+                        </li>
+                        {% else %}
+                        <!-- Menü Linkleri -->
+                        <li class="nav-item">
+                            <a class="nav-link me-4 {% if request.path == '/' %}active{% endif %}" href="{% url 'index' %}">{% trans 'Ana Sayfa' %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-4 {% if request.path == '/category/' %}active{% endif %}" href="{% url 'category' %}">{% trans 'Tüm Saatler' %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '2' %}active{% endif %}" href="{% url 'category' %}?gender=2">{% trans 'Kadın Saat' %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '1' %}active{% endif %}" href="{% url 'category' %}?gender=1">{% trans 'Erkek Saat' %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '3' %}active{% endif %}" href="{% url 'category' %}?gender=3">{% trans 'Çocuk Saat' %}</a>
+                        </li>
+
+                        {% endif %}
+
+                        <!-- Dil Seçimi -->
+                        <li class="nav-item dropdown">
+                        <a data-mdb-dropdown-init class="dropdown-toggle" href="#" id="Dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="
+                                {% if request.path|slice:'1:3' == 'en' %}
+                                    flag-united-kingdom
+                                {% else %}
+                                    flag-turkey
+                                {% endif %}
+                            flag m-0"></i>
+                        </a>
+                        {% if request.path|slice:'1:3' == 'en' %}
+                            EN
+                        {% else %}
+                            TR
+                        {% endif %}
+                            
+
+                        <ul class="dropdown-menu" aria-labelledby="Dropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'set-language' 'tr' %}"><i class="flag-turkey flag"></i>{% trans 'Türkçe' %} <i class="fa fa-check text-success ms-2"></i></a>
+                            </li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'set-language' 'en' %}"><i class="flag-united-kingdom flag"></i>{% trans 'İngilizce' %}</a>
+                            </li>
+                            
+                        </ul>
+                    </li>
+
+                        <!-- Kullanıcı Durumu -->
+                        {% if request.user.is_authenticated %}
+                        <li class="nav-item">
+                          <div class="user-items ps-5">
+                            <ul class="d-flex justify-content-center align-items-center list-unstyled">
+                              <li class="search-item pe-3">
+                                <a href="#" class="search button">
+                                  <svg class="search">
+                                    <use xlink:href="#search"></use>
+                                  </svg>
+                                </a>
+                              </li>
+
+                              <!-- Profil Menüsü -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <svg class="bi bi-person-circle me-1" width="24" height="24" fill="currentColor">
+                                        <use xlink:href="#user"></use>
+                                    </svg>
+                                    <span class="d-none d-sm-inline">Profil</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="{% url 'profile' %}">Profil Bilgileri</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'favorite' %}">Favorilerim</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Çıkış Yap</a></li>
+                                </ul>
+                            </li>
+
+                            <!-- Sepet -->
+                            <li class="nav-item d-flex align-items-center position-relative ms-3">
+                                <a href="{% url 'cart' %}" class="nav-link d-flex align-items-center p-0">
+                                    <svg class="cart" width="28" height="28" fill="currentColor" style="vertical-align: middle;">
+                                        <use xlink:href="#cart"></use>
+                                    </svg>
+                                    {% if product_quantity and product_quantity > 0 %}
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark"
+                                              style="font-size: 0.75rem; min-width: 1.5em; transform: translate(-50%, -40%);">
+                                            {{ product_quantity }}
+                                            <span class="visually-hidden">Sepetteki ürün sayısı</span>
+                                        </span>
+                                    {% endif %}
+                                </a>
+                            </li> 
+                            </ul>
+                          </div>    
+                            
+                        {% else %}
+                            <!-- Giriş Yap / Kayıt Ol -->
+                            <li class="nav-item">
+                                <a href="{% url 'login' %}" class="nav-link">Giriş Yap</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'register' %}" class="nav-link">Kayıt Ol</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>

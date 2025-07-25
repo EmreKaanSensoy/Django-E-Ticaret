@@ -1,0 +1,243 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-04 23:04+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: .\AppTicaret\templates\index.html:15
+msgid "Harika Ürünlerimiz"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:16 .\AppTicaret\templates\index.html:33
+msgid "Ürünlerimizi Keşfet"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:32
+msgid "Asla Elde Edemeyeceğiniz Teknoloji Hilesi"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:68
+msgid "Ücretsiz Teslimat"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:81
+msgid "Kalite Güvencesi"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:94
+msgid "Günlük Teklifler"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:107
+#, python-format
+msgid "100%% Güvenli Ödeme"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:119
+msgid "Mobil Ürünler"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:121 .\AppTicaret\templates\index.html:228
+msgid "Mağazaya Git"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:151 .\AppTicaret\templates\index.html:169
+#: .\AppTicaret\templates\index.html:187 .\AppTicaret\templates\index.html:205
+#: .\AppTicaret\templates\index.html:240 .\AppTicaret\templates\index.html:258
+#: .\AppTicaret\templates\index.html:276 .\AppTicaret\templates\index.html:294
+#: .\AppTicaret\templates\index.html:312
+msgid "Sepete Ekle"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:226
+#: .\AppTicaret\templates\partials\_header.html:18
+msgid "Akıllı Saatler"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:333
+#, python-format
+msgid "10%% İndirim"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:334
+msgid "Yeni Yıl İndirimi"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:335
+msgid "Mağaza Satışı"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:347
+msgid "Son Gönderiler"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:349
+msgid "Devamını Oku"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:362
+msgid "Aletler"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:365
+msgid "2025 te bazı havalı aletleri alın"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:378
+msgid "Teknoloji"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:381
+msgid "Asla Elde Edemeyeceğin Teknoloji Hilesi"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:394
+msgid "Kamera"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:397
+msgid "Dünyadaki En Küçük 10 Kamera"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:491
+msgid "Şimdi Abone Olun"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:492
+msgid ""
+"En son haberleri, güncellemeleri ve fırsatları doğrudan gelen kutunuza e-"
+"posta ile alın"
+msgstr ""
+
+#: .\AppTicaret\templates\index.html:511
+msgid "İnsta Mağazamız"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:55
+msgid "Hızlı Bağlantılar"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:58
+msgid "Ana Sayfa"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:61
+msgid "Hakkımızda"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:64
+msgid "Mağaza"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:67
+msgid "Bloglar"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:70
+msgid "İletişim"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:77
+msgid "Yardım ve Bilgi"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:80
+msgid "Sipariş Takip"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:83
+msgid "İade Politikaları"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:86
+msgid "Gönderim + Teslimat"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:89
+#: .\AppTicaret\templates\partials\_footer.html:99
+msgid "Bizimle İletişime Geçin"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:92
+msgid "Faks"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:100
+msgid "Herhangi bir sorunuz veya öneriniz var mı?"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:102
+msgid "Destek mi ihtiyacınız var? Bize bir telefon açın."
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:117
+msgid "Gönderim Yöntemleri"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_footer.html:126
+msgid "Ödeme Yöntemleri"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_header.html:11
+msgid "Kategoriler"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_header.html:15
+msgid "Cep Telefonları"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_header.html:21
+msgid "Kulaklıklar"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_header.html:24
+msgid "Aksesuarlar"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_header.html:27
+msgid "Monitörler"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_header.html:30
+msgid "Hoparlörler"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_header.html:33
+msgid "Hafıza Kartları"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_header.html:79
+msgid "Diller"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_header.html:97
+#: .\AppTicaret\templates\user\login.html:7
+#: .\AppTicaret\templates\user\login.html:20
+msgid "Giriş Yap"
+msgstr ""
+
+#: .\AppTicaret\templates\partials\_header.html:102
+msgid "Kayıt Ol"
+msgstr ""
+
+#: .\AppTicaret\templates\user\login.html:13
+msgid "E-posta Adresi"
+msgstr ""
+
+#: .\AppTicaret\templates\user\login.html:17
+msgid "Şifre"
+msgstr ""

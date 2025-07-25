@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load humanize %}
+
+{% block content %}
+<div class="container" style="padding: 150px 0;">
+    <div class="row">
+        <h3>{% trans "Profil Bilgileri" %}</h3>
+        <div class="col">
+            <div class="card">
+                <div class="card-body" style="width: 100%;">
+                    <form method="post" action="{% url 'profile' %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col mb-3">
+                                <label for="first_name" class="form-label">{% trans 'Adınız' %}</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}">
+                            </div>
+                            <div class="col mb-3"> 
+                                <label for="last_name" class="form-label">{% trans 'Soyadınız' %}</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">{% trans 'Email' %}</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">{% trans 'Telefon' %}</label>
+                            <input type="text" class="form-control" id="phone" name="phone" placeholder="+90 5XX XXX XX XX" 
+                                {% if profile.phone %}
+                                    value="{{ profile.phone }}"
+                                {% endif %}>
+                        </div>
+                        <div class="mb-3">
+                            <label for="birthday" class="form-label">{% trans "Doğum Tarihi" %}</label>
+                            <input type="date" class="form-control" id="birthday" name="birthday"
+                                {% if profile.birthday %}
+                                    value="{{ profile.birthday|date:'Y-m-d' }}"
+                                {% endif %}>
+                        </div>
+                        <button type="submit" name="update_profile" class="btn btn-primary d-block ms-auto" value="update_profile">{% trans "Kaydet" %}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <h3>{% trans "Adres Bilgileri" %}</h3>
+        <div class="col">
+            <div class="card">
+                <div class="card-body" style="width: 100%;">
+                    <form method="post" action="{% url 'profile' %}">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col mb-3">
+                                <label for="city" class="form-label">{% trans 'İl' %}</label>
+                                <input type="text" class="form-control" id="city" name="city"
+                                {% if adress.city %}
+                                    value="{{ adress.city }}"
+                                {% endif %}
+                                >
+                            </div>
+                            <div class="col mb-3"> 
+                                <label for="district" class="form-label">{% trans 'İlçe' %}</label>
+                                <input type="text" class="form-control" id="district" name="district" 
+                                {% if adress.district %}
+                                    value="{{ adress.district }}"
+                                {% endif %}
+                                >
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col mb-3">
+                                <label for="neighborhood" class="form-label">{% trans 'Mahalle' %}</label>
+                                <input type="text" class="form-control" id="neighborhood" name="neighborhood" 
+                                {% if adress.neighborhood %}
+                                    value="{{ adress.neighborhood }}"
+                                {% endif %}
+                                >
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col mb-3">
+                                <label for="address" class="form-label">{% trans 'Adres' %}</label>
+                                <textarea class="form-control" id="address" name="address" cols="30" rows="3" >
+                                    {% if adress.address %}
+                                        {{ adress.address }}
+                                    {% endif %}
+                                </textarea>
+                            </div>
+                        </div>
+                        <button type="submit" name="update_address" class="btn btn-primary d-block ms-auto" value="update_address">{% trans "Kaydet" %}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <h3>{% trans "Şifre Değiştirme" %}</h3>
+        <div class="col">
+            <div class="card">
+                <div class="card-body" style="width: 100%;">
+                    <form method="post" action="{% url 'profile' %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col mb-3">
+                                <label for="current_password" class="form-label">{% trans 'Mevcut Şifre' %}</label>
+                                <input type="password" class="form-control" id="current_password" name="current_password">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col mb-3">
+                                <label for="new_password" class="form-label">{% trans 'Yeni Şifre' %}</label>
+                                <input type="password" class="form-control" id="new_password" name="new_password">
+                            </div>
+                            <div class="col mb-3"> 
+                                <label for="confirm_password" class="form-label">{% trans 'Yeni Şifre (Tekrar)' %}</label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                            </div>
+                        </div>
+                        <button type="submit" name="change_password" class="btn btn-primary d-block ms-auto" value="change_password">{% trans "Şifre Değiştir" %}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
