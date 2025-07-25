@@ -22,10 +22,13 @@ def ProductQuantity(request):
 
 def index(request):
     products = Product.objects.all()
-
+    favorite_product_ids = []
+    if request.user.is_authenticated:
+        favorite_product_ids = list(Favorite.objects.filter(user=request.user).values_list('product_id', flat=True))
     context = {
         'products': products,
         'product_quantity': ProductQuantity(request),
+        'favorite_product_ids': favorite_product_ids,
     }
     return render(request, 'index.html', context)
 
@@ -95,6 +98,10 @@ def Category(request):
     page_number = request.GET.get("page")
     products = paginator.get_page(page_number)
 
+    favorite_product_ids = []
+    if request.user.is_authenticated:
+        favorite_product_ids = list(Favorite.objects.filter(user=request.user).values_list('product_id', flat=True))
+
     context = {
         'products': products,
         'brands': brands,
@@ -106,6 +113,7 @@ def Category(request):
         'styles': styles,
         'mechanisms': mechanisms,
         'product_quantity': ProductQuantity(request),
+        'favorite_product_ids': favorite_product_ids,
     }
     return render(request, 'category.html', context)
 
@@ -223,14 +231,22 @@ def ProductDetail(request, product_id):
     error_message = None
     edit_comment = None
 
+    # Favori kontrolü
+    is_favorite = False
+    if request.user.is_authenticated:
+        is_favorite = Favorite.objects.filter(user=request.user, product=product).exists()
+
     if request.method == "POST":
         if request.POST.get("productid"):
             productid = request.POST.get("productid")
             product = Product.objects.get(id=productid)
+            quantity = int(request.POST.get("quantity", 1))
             cart_product, created = CartProduct.objects.get_or_create(user=request.user, product=product)
             if not created:
-                cart_product.quantity += 1
-                cart_product.save()
+                cart_product.quantity += quantity
+            else:
+                cart_product.quantity = quantity
+            cart_product.save()
         elif request.POST.get("comment"):
             comment_text = request.POST.get("comment_text")
             if request.user.is_authenticated and comment_text:
@@ -267,6 +283,7 @@ def ProductDetail(request, product_id):
         'comments': comments,
         'error_message': error_message,
         'edit_comment': edit_comment,
+        'is_favorite': is_favorite,
     }
     return render(request, 'product_detail.html', context)
 
@@ -334,10 +351,24 @@ def set_language(request, language):
 
 def Favorites(request):
     favorites = Favorite.objects.filter(user=request.user)
-
+    favorite_product_ids = list(favorites.values_list('product_id', flat=True))
     context = {
         'favorites': favorites,
         'product_quantity': ProductQuantity(request),
+        'favorite_product_ids': favorite_product_ids,
     }
-
     return render(request, 'favorite.html', context)
+
+def remove_favorite(request, product_id):
+    if request.user.is_authenticated:
+        Favorite.objects.filter(user=request.user, product_id=product_id).delete()
+    return redirect('favorite')
+
+def toggle_favorite(request, product_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    product = Product.objects.get(id=product_id)
+    favorite, created = Favorite.objects.get_or_create(user=request.user, product=product)
+    if not created:
+        favorite.delete()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

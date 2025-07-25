@@ -29,6 +29,8 @@ urlpatterns = [
     path("cart/", Cart, name='cart'),
     path("product_detail/<int:product_id>/", ProductDetail, name='product_detail'),
     path("favorite/", Favorites, name='favorite'),
+    path("favorite/remove/<int:product_id>/", remove_favorite, name='remove-favorite'),
+    path("favorite_toggle/<int:product_id>/", toggle_favorite, name='favorite-toggle'),
 
     #Authentication URLs
     path("login/", Login, name='login'),

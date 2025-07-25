@@ -139,6 +139,26 @@
                       <a href="#" class="btn btn-medium btn-black">{% trans 'Sepete Ekle' %}<svg class="cart-outline"><use xlink:href="#cart-outline"></use></svg></a>
                     </div>
                   </div>
+                  <div class="d-flex justify-content-between align-items-center mb-2" style="position:absolute;top:10px;right:10px;z-index:2;">
+                      {% if user.is_authenticated %}
+                          <form action="{% url 'favorite-toggle' product.id %}" method="post" style="position:absolute;top:10px;right:10px;z-index:2;display:inline;">
+                              {% csrf_token %}
+                              <button type="submit" class="btn p-0 border-0 bg-transparent" title="Favorilere Ekle/Kaldır">
+                                  {% if user.is_authenticated and product.id in favorite_product_ids %}
+                                      <i class="fa-solid fa-heart"></i>
+                                  {% else %}
+                                      <i class="fa-regular fa-heart"></i>
+                                  {% endif %}
+                              </button>
+                          </form>
+                      {% else %}
+                          <button class="btn p-0 border-0 bg-transparent" title="Favorilere eklemek için giriş yapın" disabled>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="gray" stroke-width="2" class="bi bi-heart" viewBox="0 0 16 16">
+                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-1.118 2.175-.163 4.905 3.053 7.385L8 15l3.547-4.562c3.216-2.48 4.171-5.21 3.053-7.385C13.486.878 10.4.28 8.717 2.01L8 2.748z"/>
+                              </svg>
+                          </button>
+                      {% endif %}
+                  </div>
                   <div class="card-detail d-flex justify-content-between align-items-baseline flex-column pt-3">
                     <h3 class="card-title text-uppercase">
                       {{product.brand}}
@@ -182,6 +202,26 @@
                     <div class="cart-button d-flex">
                       <a href="#" class="btn btn-medium btn-black">{% trans 'Sepete Ekle' %}<svg class="cart-outline"><use xlink:href="#cart-outline"></use></svg></a>
                     </div>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-2" style="position:absolute;top:10px;right:10px;z-index:2;">
+                      {% if user.is_authenticated %}
+                          <form action="{% url 'favorite-toggle' product.id %}" method="post" style="position:absolute;top:10px;right:10px;z-index:2;display:inline;">
+                              {% csrf_token %}
+                              <button type="submit" class="btn p-0 border-0 bg-transparent" title="Favorilere Ekle/Kaldır">
+                                  {% if user.is_authenticated and product.id in favorite_product_ids %}
+                                      <i class="fa-solid fa-heart"></i>
+                                  {% else %}
+                                      <i class="fa-regular fa-heart"></i>
+                                  {% endif %}
+                              </button>
+                          </form>
+                      {% else %}
+                          <button class="btn p-0 border-0 bg-transparent" title="Favorilere eklemek için giriş yapın" disabled>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="gray" stroke-width="2" class="bi bi-heart" viewBox="0 0 16 16">
+                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-1.118 2.175-.163 4.905 3.053 7.385L8 15l3.547-4.562c3.216-2.48 4.171-5.21 3.053-7.385C13.486.878 10.4.28 8.717 2.01L8 2.748z"/>
+                              </svg>
+                          </button>
+                      {% endif %}
                   </div>
                   <div class="card-detail d-flex justify-content-between align-items-baseline flex-column pt-3">
                     <h3 class="card-title text-uppercase">

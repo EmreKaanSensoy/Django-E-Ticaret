@@ -7,25 +7,35 @@
 <div class="container" style="padding: 150px 0;">
     <div class="row">
         <div class="col-5">
-            <div class="card" style="width: 100%;">
+            <div class="card" style="width: 100%; position: relative;">
                 <img src="{{product.image.url}}" class="card-img-top" alt="...">
+                <form action="{% url 'favorite-toggle' product.id %}" method="post" style="position:absolute;top:10px;right:10px;z-index:2;display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn p-0 border-0 bg-transparent" title="Favorilere Ekle/Kaldır">
+                        {% if user.is_authenticated and is_favorite %}
+                            <i class="fa-solid fa-heart"></i>
+                        {% else %}
+                            <i class="fa-regular fa-heart"></i>
+                        {% endif %}
+                    </button>
+                </form>
             </div>
         </div>
         <div class="col-7">
           <div class="card">
-            <div class="card-body">
-              <h3 class="card-title">{{ product.brand }}</h3>
-              <h5 class="card-subtitle mb-2 text-muted">{{ product.model }}</h5>
-              <p class="card-text fs-5 fw-bold mb-2">{{ product.price|intcomma }} ₺</p>
-              <p class="card-text">{{ product.description }}</p>
-              <div class="d-flex justify-content-between">
-                <a href="#" class="btn btn-primary">Favorilere Ekle</a>
-                <form method="post">
-                  {% csrf_token %}
-                  <input type="hidden" name="productid" value="{{ product.id }}">
-                  <button type="submit" class="btn btn-primary">Sepete Ekle</button>
-                </form>
-              </div> 
+            <div class="card-body position-relative">
+                <h3 class="card-title">{{ product.brand }}</h3>
+                <h5 class="card-subtitle mb-2 text-muted">{{ product.model }}</h5>
+                <p class="card-text fs-5 fw-bold mb-2">{{ product.price|intcomma }} ₺</p>
+                <p class="card-text">{{ product.description }}</p>
+                <div class="d-flex justify-content-between">
+                    <form method="post" class="d-flex align-items-center gap-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="productid" value="{{ product.id }}">
+                        <input type="number" name="quantity" min="1" value="1" class="form-control" style="width: 80px;" required>
+                        <button type="submit" class="btn btn-primary">Sepete Ekle</button>
+                    </form>
+                </div>
             </div>
           </div>
         </div>
@@ -37,7 +47,7 @@
           <div class="col-md-12 col-lg-10 col-xl-8">
             <!-- Yorumları Listele -->
             {% for comment in comments %}
-            <div class="card mb-3">
+            <div class="card mb-3" style="position:relative;">
               <div class="card-body">
                 <div class="d-flex flex-start align-items-center">
                   <div>
@@ -51,10 +61,12 @@
                   {{ comment.comment }}
                 </p>
                 {% if user.is_authenticated and comment.user == user %}
-                  <form method="post" style="display:inline;">
+                  <form method="post" style="position:absolute;top:10px;right:10px;display:inline;" id="edit-btn-{{ comment.id }}">
                     {% csrf_token %}
                     <input type="hidden" name="edit_request_id" value="{{ comment.id }}">
-                    <button type="submit" class="btn btn-sm btn-outline-secondary">Düzenle</button>
+                    <a href="#edit-comment-form" onclick="this.closest('form').submit(); return false;" class="btn btn-sm btn-outline-secondary p-1" title="Yorumu Düzenle">
+                      <i class="fa-solid fa-pencil"></i>
+                    </a>
                   </form>
                 {% endif %}
               </div>
@@ -69,13 +81,13 @@
                 <div class="alert alert-danger mt-3 mb-0">{{ error_message }}</div>
               {% endif %}
               {% if edit_comment %}
-                <form method="post">
+                <form method="post" id="edit-comment-form">
                   {% csrf_token %}
                   <input type="hidden" name="edit_comment_id" value="{{ edit_comment.id }}">
                   <div class="card-footer py-3 border-0" style="background-color: #f8f9fa;">
                     <div class="form-outline w-100">
+                      <label class="form-label mb-2" for="editTextArea">{% trans 'Yorumunuzu Düzenleyin' %}</label>
                       <textarea class="form-control" id="editTextArea" rows="4" name="edit_comment_text" style="background: #fff;">{{ edit_comment.comment }}</textarea>
-                      <label class="form-label" for="editTextArea">{% trans 'Yorumunuzu Düzenleyin' %}</label>
                     </div>
                     <div class="float-end mt-2 pt-1">
                       <button type="submit" class="btn btn-primary btn-sm">{% trans 'Kaydet' %}</button>
@@ -88,8 +100,8 @@
                   {% csrf_token %}
                   <div class="card-footer py-3 border-0" style="background-color: #f8f9fa;">
                     <div class="form-outline w-100">
+                      <label class="form-label mb-2" for="textAreaExample">{% trans 'Yorum Yaz' %}</label>
                       <textarea class="form-control" id="textAreaExample" rows="4" name="comment_text" style="background: #fff;"></textarea>
-                      <label class="form-label" for="textAreaExample">{% trans 'Yorum Yaz' %}</label>
                     </div>
                     <div class="float-end mt-2 pt-1">
                       <button type="submit" class="btn btn-primary btn-sm" name="comment" value="comment">{% trans 'Yorum Yap' %}</button>
