@@ -111,6 +111,7 @@ class Product(models.Model):
     model = models.CharField(max_length=250)
     description = models.TextField()
     price = models.FloatField()
+    stock = models.PositiveIntegerField(default=0, verbose_name="Stok Miktarı")
     gender = models.ForeignKey(Gender, on_delete=models.CASCADE)
     color = models.ForeignKey(Color, on_delete=models.CASCADE)
     case_shape = models.ForeignKey(CaseShape, on_delete=models.CASCADE)
@@ -121,6 +122,21 @@ class Product(models.Model):
 
     def __str__(self):
         return self.model
+    
+    @property
+    def is_in_stock(self):
+        """Ürünün stokta olup olmadığını kontrol eder"""
+        return self.stock > 0
+    
+    @property
+    def stock_status(self):
+        """Stok durumunu metin olarak döndürür"""
+        if self.stock == 0:
+            return "Stokta Yok"
+        elif self.stock <= 5:
+            return f"Son {self.stock} Adet"
+        else:
+            return "Stokta Var"
     
     @property
     def primary_image(self):
@@ -136,7 +152,7 @@ class Product(models.Model):
     def all_images(self):
         """Tüm görselleri sıralı şekilde döndürür"""
         return self.images.all().order_by('order', 'created_at')
-
+    
     class Meta:
         verbose_name_plural = "Ürünler"
 
@@ -228,7 +244,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.product.model} - {self.rating} Yıldız"
-
+    
     class Meta:
         verbose_name_plural = "Yorumlar"
         ordering = ['-create_date']
@@ -275,6 +291,11 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.FloatField()  # Sipariş anındaki fiyat
+    
+    @property
+    def total_price(self):
+        """Sipariş öğesinin toplam fiyatını hesaplar"""
+        return self.quantity * self.price
     
     def __str__(self):
         return f"{self.product.model} x {self.quantity}"

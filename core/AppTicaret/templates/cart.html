@@ -20,6 +20,7 @@
                     <th scope="col">{% trans 'Marka' %}</th>
                     <th scope="col">{% trans 'Model' %}</th>
                     <th scope="col">{% trans 'Fiyat' %}</th>
+                    <th scope="col">{% trans 'Stok' %}</th>
                     <th scope="col">{% trans 'Adet' %}</th>
                     <th scope="col">{% trans 'Sil' %}</th>
                 </tr>
@@ -40,6 +41,16 @@
                     
                     <!-- Fiyat -->
                     <td>{{ product.product.price|floatformat:2 }} ₺</td>
+                    
+                    <!-- Stok -->
+                    <td>
+                        <span class="badge 
+                            {% if product.product.stock == 0 %}bg-danger
+                            {% elif product.product.stock <= 5 %}bg-warning
+                            {% else %}bg-success{% endif %}">
+                            {{ product.product.stock_status }}
+                        </span>
+                    </td>
                     
                     <!-- Adet -->
                     <td>

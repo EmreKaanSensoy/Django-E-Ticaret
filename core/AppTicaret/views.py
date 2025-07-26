@@ -135,6 +135,12 @@ def Cart(request):
         if "update_quantity" in request.POST:
             quantity = int(request.POST.get("quantity", 1))
             cart_product = CartProduct.objects.get(id=product_id)
+            
+            # Stok kontrolü
+            if quantity > cart_product.product.stock:
+                messages.error(request, f"Yeterli stok bulunmamaktadır! Mevcut stok: {cart_product.product.stock}")
+                return redirect('cart')
+            
             cart_product.quantity = max(1, quantity)
             cart_product.save()
         else:
@@ -230,12 +236,12 @@ def profile(request):
 def ProductDetail(request, product_id):
     product = Product.objects.get(id=product_id)
     comments = Comment.objects.filter(product=product).order_by('-create_date')
-    
+
     # Favori kontrolü
     is_favorite = False
     if request.user.is_authenticated:
         is_favorite = Favorite.objects.filter(user=request.user, product=product).exists()
-    
+
     # Kullanıcının yorum yapabilir mi kontrolü
     can_comment = False
     if request.user.is_authenticated:
@@ -253,7 +259,7 @@ def ProductDetail(request, product_id):
     
     # Ortalama puan hesapla
     if comments.exists():
-        average_rating = comments.aggregate(avg_rating=models.Avg('rating'))['avg_rating']
+        average_rating = comments.aggregate(avg_rating=Avg('rating'))['avg_rating']
     else:
         average_rating = 0
 
@@ -359,6 +365,15 @@ def add_to_cart(request, product_id):
         product = Product.objects.get(id=product_id)
         quantity = int(request.POST.get("quantity", 1))
         
+        # Stok kontrolü
+        if not product.is_in_stock:
+            messages.error(request, f"{product.model} şu anda stokta bulunmamaktadır!")
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+        
+        if quantity > product.stock:
+            messages.error(request, f"Yeterli stok bulunmamaktadır! Mevcut stok: {product.stock}")
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+        
         # Sepette bu ürün var mı kontrol et
         cart_product, created = CartProduct.objects.get_or_create(
             user=request.user, 
@@ -367,7 +382,11 @@ def add_to_cart(request, product_id):
         
         if not created:
             # Ürün zaten sepette varsa miktarı artır
-            cart_product.quantity += quantity
+            new_quantity = cart_product.quantity + quantity
+            if new_quantity > product.stock:
+                messages.error(request, f"Yeterli stok bulunmamaktadır! Mevcut stok: {product.stock}")
+                return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+            cart_product.quantity = new_quantity
         else:
             # Yeni ürün ekleniyorsa miktarı ayarla
             cart_product.quantity = quantity
@@ -443,10 +462,6 @@ def order_detail(request, order_id):
     except Order.DoesNotExist:
         messages.error(request, "Sipariş bulunamadı!")
         return redirect('profile')
-    
-    # Her ürün için toplam fiyatı hesapla
-    for item in order.items.all():
-        item.total_price = item.price * item.quantity
     
     context = {
         'order': order,

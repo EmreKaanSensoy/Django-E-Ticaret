@@ -43,14 +43,71 @@
                 <h3 class="card-title">{{ product.brand }}</h3>
                 <h5 class="card-subtitle mb-2 text-muted">{{ product.model }}</h5>
                 <p class="card-text fs-5 fw-bold mb-2">{{ product.price|intcomma }} ₺</p>
+                
+                <!-- Stok Durumu -->
+                <div class="mb-3">
+                    <span class="badge 
+                        {% if product.stock == 0 %}bg-danger
+                        {% elif product.stock <= 5 %}bg-warning
+                        {% else %}bg-success{% endif %}">
+                        {{ product.stock_status }}
+                    </span>
+                    {% if product.stock > 0 and product.stock <= 5 %}
+                        <small class="text-warning ms-2">Hızlı alın, stok azalıyor!</small>
+                    {% endif %}
+                </div>
+                
                 <p class="card-text">{{ product.description }}</p>
+                
+                <!-- Ürün Özellikleri -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted">Cinsiyet:</small><br>
+                        <strong>{{ product.gender }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Renk:</small><br>
+                        <strong>{{ product.color }}</strong>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted">Kasa Şekli:</small><br>
+                        <strong>{{ product.case_shape }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Kayış Türü:</small><br>
+                        <strong>{{ product.strap_type }}</strong>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted">Cam Özelliği:</small><br>
+                        <strong>{{ product.glass_feature }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Stil:</small><br>
+                        <strong>{{ product.style }}</strong>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted">Mekanizma:</small><br>
+                        <strong>{{ product.mechanism }}</strong>
+                    </div>
+                </div>
+                
                 <div class="d-flex justify-content-between">
                     {% if user.is_authenticated %}
-                        <form action="{% url 'add-to-cart' product.id %}" method="post" class="d-flex align-items-center gap-2">
-                            {% csrf_token %}
-                            <input type="number" name="quantity" min="1" value="1" class="form-control" style="width: 80px;" required>
-                            <button type="submit" class="btn btn-primary">Sepete Ekle</button>
-                        </form>
+                        {% if product.is_in_stock %}
+                            <form action="{% url 'add-to-cart' product.id %}" method="post" class="d-flex align-items-center gap-2">
+                                {% csrf_token %}
+                                <input type="number" name="quantity" min="1" max="{{ product.stock }}" value="1" class="form-control" style="width: 80px;" required>
+                                <button type="submit" class="btn btn-primary">Sepete Ekle</button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-secondary" disabled>Stokta Yok</button>
+                        {% endif %}
                     {% else %}
                         <a href="{% url 'login' %}" class="btn btn-primary">Sepete Ekle</a>
                     {% endif %}
@@ -77,7 +134,7 @@
                             <h4 class="mb-0">{{ average_rating|floatformat:1 }}</h4>
                             <small class="text-muted">Ortalama Puan</small>
                         </div>
-                        <div>
+                  <div>
                             <div class="d-flex">
                                 {% for i in "12345" %}
                                     {% if forloop.counter <= average_rating %}
@@ -89,7 +146,7 @@
                             </div>
                             <small class="text-muted">{{ average_rating|floatformat:1 }} / 5</small>
                         </div>
-                    </div>
+                  </div>
                 </div>
             </div>
             
@@ -124,7 +181,7 @@
                                     <small class="text-muted">{{ comment.create_date|date:'d.m.Y H:i' }}</small>
                                 </div>
                             </div>
-                            {% if user.is_authenticated and comment.user == user %}
+                {% if user.is_authenticated and comment.user == user %}
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                     <i class="fas fa-ellipsis-v"></i>
@@ -138,24 +195,24 @@
                                     </a></li>
                                 </ul>
                             </div>
-                            {% endif %}
+                {% endif %}
                         </div>
                         <p class="mt-3 mb-0">{{ comment.comment }}</p>
-                    </div>
-                </div>
-                {% empty %}
+              </div>
+            </div>
+            {% empty %}
                 <div class="text-center py-5">
                     <i class="fas fa-comments fa-3x text-muted mb-3"></i>
                     <h5 class="text-muted">Henüz yorum yapılmamış</h5>
                     <p class="text-muted">Bu ürün için ilk yorumu siz yapın!</p>
                 </div>
-                {% endfor %}
+            {% endfor %}
             </div>
-            
+
             <!-- Yorum Ekleme Formu -->
             {% if user.is_authenticated %}
                 {% if can_comment %}
-                <div class="card mt-4">
+            <div class="card mt-4">
                     <div class="card-header">
                         <h5 class="mb-0">Yorum Yap</h5>
                     </div>
@@ -171,8 +228,8 @@
                                         <i class="far fa-star"></i>
                                     </label>
                                     {% endfor %}
-                                </div>
-                            </div>
+                    </div>
+                  </div>
                             <div class="mb-3">
                                 <label for="comment" class="form-label">Yorumunuz</label>
                                 <textarea class="form-control" id="comment" name="comment" rows="4" placeholder="Bu ürün hakkında düşüncelerinizi paylaşın..." required></textarea>
@@ -180,15 +237,15 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane me-2"></i>Yorum Gönder
                             </button>
-                        </form>
+                </form>
                     </div>
-                </div>
+                  </div>
                 {% else %}
                 <div class="alert alert-info mt-4">
                     <i class="fas fa-info-circle me-2"></i>
                     Bu ürünü satın aldıktan sonra yorum yapabilirsiniz.
                 </div>
-                {% endif %}
+              {% endif %}
             {% else %}
             <div class="alert alert-warning mt-4">
                 <i class="fas fa-exclamation-triangle me-2"></i>
@@ -196,7 +253,7 @@
             </div>
             {% endif %}
         </div>
-    </div>
+      </div>
 </div>
 
 <style>

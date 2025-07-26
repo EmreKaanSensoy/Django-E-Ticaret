@@ -9,15 +9,25 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['brand', 'model', 'price', 'gender', 'color', 'image_count']
-    list_filter = ['brand', 'gender', 'color', 'case_shape', 'strap_type']
+    list_display = ['brand', 'model', 'price', 'stock', 'stock_status', 'gender', 'color', 'image_count']
+    list_filter = ['brand', 'gender', 'color', 'case_shape', 'strap_type', 'stock']
     search_fields = ['brand__brand', 'model', 'description']
     ordering = ['brand', 'model']
     inlines = [ProductImageInline]
+    list_editable = ['stock']
     
     def image_count(self, obj):
         return obj.images.count()
     image_count.short_description = 'Görsel Sayısı'
+    
+    def stock_status(self, obj):
+        if obj.stock == 0:
+            return "Stokta Yok"
+        elif obj.stock <= 5:
+            return f"Son {obj.stock} Adet"
+        else:
+            return "Stokta Var"
+    stock_status.short_description = 'Stok Durumu'
 
 admin.site.register(CartProduct)
 admin.site.register(Profile)

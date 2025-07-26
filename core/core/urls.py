@@ -41,7 +41,7 @@ urlpatterns = [
     path("address/delete/<int:address_id>/", delete_address, name='delete_address'),
     path("address/set-default/<int:address_id>/", set_default_address, name='set_default_address'),
     path("track-shipment/", track_shipment, name='track_shipment'),
-    
+
     # Yorum sistemi URL'leri
     path("comment/add/<int:product_id>/", add_comment, name='add_comment'),
     path("comment/edit/<int:comment_id>/", edit_comment, name='edit_comment'),
