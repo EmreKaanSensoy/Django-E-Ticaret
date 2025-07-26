@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container">
+        <h1 class="display-3 mb-3 animated slideInDown">Yeni Adres Ekle</h1>
+        <nav aria-label="breadcrumb animated slideInDown">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a class="text-body" href="{% url 'index' %}">Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a class="text-body" href="{% url 'address_list' %}">Adreslerim</a></li>
+                <li class="breadcrumb-item text-dark active" aria-current="page">Yeni Adres Ekle</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Add Address Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Yeni Adres Bilgileri</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="title" class="form-label">Adres Başlığı *</label>
+                                    <input type="text" class="form-control" id="title" name="title" required placeholder="Ev, İş, vs.">
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="address_type" class="form-label">Adres Türü *</label>
+                                    <select class="form-select" id="address_type" name="address_type" required>
+                                        <option value="">Seçiniz</option>
+                                        <option value="home">Ev</option>
+                                        <option value="work">İş</option>
+                                        <option value="other">Diğer</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="first_name" class="form-label">Ad *</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="last_name" class="form-label">Soyad *</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="phone" class="form-label">Telefon *</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required placeholder="05XX XXX XX XX">
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="city" class="form-label">İl *</label>
+                                    <input type="text" class="form-control" id="city" name="city" required>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="district" class="form-label">İlçe *</label>
+                                    <input type="text" class="form-control" id="district" name="district" required>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label for="neighborhood" class="form-label">Mahalle *</label>
+                                    <input type="text" class="form-control" id="neighborhood" name="neighborhood" required>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label for="address" class="form-label">Açık Adres *</label>
+                                    <textarea class="form-control" id="address" name="address" rows="3" required placeholder="Sokak, cadde, bina no, daire no vb."></textarea>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="is_default" name="is_default">
+                                        <label class="form-check-label" for="is_default">
+                                            Bu adresi varsayılan adresim yap
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">Adresi Kaydet</button>
+                                        <a href="{% url 'address_list' %}" class="btn btn-outline-secondary">İptal</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add Address End -->
+{% endblock %} 

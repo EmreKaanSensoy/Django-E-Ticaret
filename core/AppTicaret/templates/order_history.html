@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load humanize %}
+
+{% block content %}
+<div class="container" style="padding: 150px 0;">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-4">Sipariş Geçmişi</h1>
+            
+            {% if orders %}
+                <div class="row">
+                    {% for order in orders %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Sipariş #{{ order.id }}</h5>
+                                <span class="badge 
+                                    {% if order.status == 'pending' %}bg-warning
+                                    {% elif order.status == 'processing' %}bg-info
+                                    {% elif order.status == 'shipped' %}bg-primary
+                                    {% elif order.status == 'delivered' %}bg-success
+                                    {% elif order.status == 'cancelled' %}bg-danger
+                                    {% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Tarih:</strong> {{ order.order_date|date:"d.m.Y" }}</p>
+                                        <p><strong>Saat:</strong> {{ order.order_date|date:"H:i" }}</p>
+                                        <p><strong>Tutar:</strong> {{ order.total_amount|intcomma }} ₺</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Ürün Sayısı:</strong> {{ order.items.count }}</p>
+                                        {% if order.tracking_number %}
+                                            <p><strong>Takip No:</strong> {{ order.tracking_number }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="{% url 'order_detail' order.id %}" class="btn btn-primary btn-sm">Detayları Gör</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <div class="alert alert-info">
+                        <h4>Henüz siparişiniz bulunmamaktadır.</h4>
+                        <p>Alışverişe başlamak için aşağıdaki butona tıklayın.</p>
+                        <a href="{% url 'category' %}" class="btn btn-primary">Alışverişe Başla</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %} 

@@ -1,19 +1,21 @@
 from urllib.parse import urlparse
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls.base import resolve, reverse
 from django.urls.exceptions import Resolver404
 from django.utils import translation
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import *
-from django.db.models import Q
-from django.db.models import Sum
+from .models import Product, CartProduct, Profile, Address, Favorite, Comment, Order, OrderItem, Brand, Gender, Color, CaseShape, StrapType, GlassFeature, Style, Mechanism
+from django.db.models import Q, Sum, Avg
 from django.core.paginator import Paginator
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 def ProductQuantity(request):
     if request.user.is_authenticated:
@@ -154,7 +156,7 @@ def Cart(request):
 def profile(request):
     user = request.user
     profile, created = Profile.objects.get_or_create(user=user)
-    adress, created = Adress.objects.get_or_create(user=user)
+    adress, created = Address.objects.get_or_create(user=user)
 
     if request.method == "POST":
         if "change_password" in request.POST:
@@ -228,62 +230,40 @@ def profile(request):
 def ProductDetail(request, product_id):
     product = Product.objects.get(id=product_id)
     comments = Comment.objects.filter(product=product).order_by('-create_date')
-    error_message = None
-    edit_comment = None
-
+    
     # Favori kontrolü
     is_favorite = False
     if request.user.is_authenticated:
         is_favorite = Favorite.objects.filter(user=request.user, product=product).exists()
-
-    if request.method == "POST":
-        if request.POST.get("productid"):
-            productid = request.POST.get("productid")
-            product = Product.objects.get(id=productid)
-            quantity = int(request.POST.get("quantity", 1))
-            cart_product, created = CartProduct.objects.get_or_create(user=request.user, product=product)
-            if not created:
-                cart_product.quantity += quantity
-            else:
-                cart_product.quantity = quantity
-            cart_product.save()
-        elif request.POST.get("comment"):
-            comment_text = request.POST.get("comment_text")
-            if request.user.is_authenticated and comment_text:
-                # Kullanıcı bu ürüne daha önce yorum yapmış mı kontrol et
-                if not Comment.objects.filter(user=request.user, product=product).exists():
-                    Comment.objects.create(
-                        user=request.user,
-                        comment=comment_text,
-                        product=product
-                    )
-                    return redirect('product_detail', product_id=product.id)
-                else:
-                    error_message = "Bu ürüne zaten bir yorum yaptınız."
-        elif request.POST.get("edit_comment_id"):
-            edit_comment_id = request.POST.get("edit_comment_id")
-            edit_comment_text = request.POST.get("edit_comment_text")
-            try:
-                comment_obj = Comment.objects.get(id=edit_comment_id, user=request.user, product=product)
-                comment_obj.comment = edit_comment_text
-                comment_obj.save()
-                return redirect('product_detail', product_id=product.id)
-            except Comment.DoesNotExist:
-                error_message = "Yorumu düzenleme yetkiniz yok."
-        elif request.POST.get("edit_request_id"):
-            # Düzenleme formunu göstermek için
-            try:
-                edit_comment = Comment.objects.get(id=request.POST.get("edit_request_id"), user=request.user, product=product)
-            except Comment.DoesNotExist:
-                edit_comment = None
+    
+    # Kullanıcının yorum yapabilir mi kontrolü
+    can_comment = False
+    if request.user.is_authenticated:
+        # Kullanıcının bu ürünü satın alıp almadığını kontrol et
+        has_purchased = OrderItem.objects.filter(
+            order__user=request.user,
+            product=product,
+            order__status='delivered'
+        ).exists()
+        
+        # Kullanıcının bu ürün için daha önce yorum yapıp yapmadığını kontrol et
+        has_commented = Comment.objects.filter(user=request.user, product=product).exists()
+        
+        can_comment = has_purchased and not has_commented
+    
+    # Ortalama puan hesapla
+    if comments.exists():
+        average_rating = comments.aggregate(avg_rating=models.Avg('rating'))['avg_rating']
+    else:
+        average_rating = 0
 
     context = {
         'product': product,
         'product_quantity': ProductQuantity(request),
         'comments': comments,
-        'error_message': error_message,
-        'edit_comment': edit_comment,
         'is_favorite': is_favorite,
+        'can_comment': can_comment,
+        'average_rating': average_rating,
     }
     return render(request, 'product_detail.html', context)
 
@@ -372,3 +352,350 @@ def toggle_favorite(request, product_id):
     if not created:
         favorite.delete()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required(login_url='login')
+def add_to_cart(request, product_id):
+    if request.method == "POST":
+        product = Product.objects.get(id=product_id)
+        quantity = int(request.POST.get("quantity", 1))
+        
+        # Sepette bu ürün var mı kontrol et
+        cart_product, created = CartProduct.objects.get_or_create(
+            user=request.user, 
+            product=product
+        )
+        
+        if not created:
+            # Ürün zaten sepette varsa miktarı artır
+            cart_product.quantity += quantity
+        else:
+            # Yeni ürün ekleniyorsa miktarı ayarla
+            cart_product.quantity = quantity
+            
+        cart_product.save()
+        messages.success(request, f"{product.model} sepete eklendi!")
+        
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required(login_url='login')
+def checkout(request):
+    if request.method == "POST":
+        address_id = request.POST.get('shipping_address')
+        if not address_id:
+            messages.error(request, "Lütfen teslimat adresi seçin!")
+            return redirect('checkout')
+        
+        try:
+            address = Address.objects.get(id=address_id, user=request.user)
+        except Address.DoesNotExist:
+            messages.error(request, "Seçilen adres bulunamadı!")
+            return redirect('checkout')
+        
+        cart_products = CartProduct.objects.filter(user=request.user)
+        if not cart_products.exists():
+            messages.error(request, "Sepetinizde ürün bulunmamaktadır!")
+            return redirect('cart')
+        
+        total_amount = sum(product.product.price * product.quantity for product in cart_products)
+        total_amount += 29.99  # Kargo ücreti
+        
+        order = Order.objects.create(
+            user=request.user,
+            total_amount=total_amount,
+            shipping_address=address
+        )
+        
+        for cart_product in cart_products:
+            OrderItem.objects.create(
+                order=order,
+                product=cart_product.product,
+                quantity=cart_product.quantity,
+                price=cart_product.product.price
+            )
+        
+        cart_products.delete()
+        messages.success(request, f"Siparişiniz başarıyla oluşturuldu! Sipariş numarası: #{order.id}")
+        return redirect('order_detail', order_id=order.id)
+    
+    # GET request - checkout sayfasını göster
+    addresses = Address.objects.filter(user=request.user).order_by('-is_default', '-created_at')
+    cart_products = CartProduct.objects.filter(user=request.user)
+    
+    if not cart_products.exists():
+        messages.error(request, "Sepetinizde ürün bulunmamaktadır!")
+        return redirect('cart')
+    
+    total_amount = sum(product.product.price * product.quantity for product in cart_products)
+    total_amount += 29.99  # Kargo ücreti
+    
+    context = {
+        'addresses': addresses,
+        'cart_products': cart_products,
+        'total_amount': total_amount,
+        'product_quantity': ProductQuantity(request),
+    }
+    return render(request, 'checkout.html', context)
+
+@login_required(login_url='login')
+def order_detail(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+    except Order.DoesNotExist:
+        messages.error(request, "Sipariş bulunamadı!")
+        return redirect('profile')
+    
+    # Her ürün için toplam fiyatı hesapla
+    for item in order.items.all():
+        item.total_price = item.price * item.quantity
+    
+    context = {
+        'order': order,
+        'product_quantity': ProductQuantity(request),
+    }
+    return render(request, 'order_detail.html', context)
+
+@login_required(login_url='login')
+def order_history(request):
+    orders = Order.objects.filter(user=request.user).order_by('-order_date')
+    
+    context = {
+        'orders': orders,
+        'product_quantity': ProductQuantity(request),
+    }
+    return render(request, 'order_history.html', context)
+
+@login_required(login_url='login')
+def address_list(request):
+    addresses = Address.objects.filter(user=request.user).order_by('-is_default', '-created_at')
+    
+    context = {
+        'addresses': addresses,
+        'product_quantity': ProductQuantity(request),
+    }
+    return render(request, 'address_list.html', context)
+
+@login_required(login_url='login')
+def add_address(request):
+    if request.method == "POST":
+        title = request.POST.get('title')
+        address_type = request.POST.get('address_type')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        phone = request.POST.get('phone')
+        city = request.POST.get('city')
+        district = request.POST.get('district')
+        neighborhood = request.POST.get('neighborhood')
+        address = request.POST.get('address')
+        is_default = request.POST.get('is_default') == 'on'
+        
+        new_address = Address.objects.create(
+            user=request.user,
+            title=title,
+            address_type=address_type,
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
+            city=city,
+            district=district,
+            neighborhood=neighborhood,
+            address=address,
+            is_default=is_default
+        )
+        
+        messages.success(request, "Adres başarıyla eklendi!")
+        return redirect('address_list')
+    
+    context = {
+        'product_quantity': ProductQuantity(request),
+    }
+    return render(request, 'add_address.html', context)
+
+@login_required(login_url='login')
+def edit_address(request, address_id):
+    try:
+        address = Address.objects.get(id=address_id, user=request.user)
+    except Address.DoesNotExist:
+        messages.error(request, "Adres bulunamadı!")
+        return redirect('address_list')
+    
+    if request.method == "POST":
+        address.title = request.POST.get('title')
+        address.address_type = request.POST.get('address_type')
+        address.first_name = request.POST.get('first_name')
+        address.last_name = request.POST.get('last_name')
+        address.phone = request.POST.get('phone')
+        address.city = request.POST.get('city')
+        address.district = request.POST.get('district')
+        address.neighborhood = request.POST.get('neighborhood')
+        address.address = request.POST.get('address')
+        address.is_default = request.POST.get('is_default') == 'on'
+        address.save()
+        
+        messages.success(request, "Adres başarıyla güncellendi!")
+        return redirect('address_list')
+    
+    context = {
+        'address': address,
+        'product_quantity': ProductQuantity(request),
+    }
+    return render(request, 'edit_address.html', context)
+
+@login_required(login_url='login')
+def delete_address(request, address_id):
+    try:
+        address = Address.objects.get(id=address_id, user=request.user)
+        address.delete()
+        messages.success(request, "Adres başarıyla silindi!")
+    except Address.DoesNotExist:
+        messages.error(request, "Adres bulunamadı!")
+    
+    return redirect('address_list')
+
+@login_required(login_url='login')
+def set_default_address(request, address_id):
+    try:
+        address = Address.objects.get(id=address_id, user=request.user)
+        # Diğer adresleri varsayılan olmaktan çıkar
+        Address.objects.filter(user=request.user, is_default=True).update(is_default=False)
+        # Bu adresi varsayılan yap
+        address.is_default = True
+        address.save()
+        messages.success(request, "Varsayılan adres güncellendi!")
+    except Address.DoesNotExist:
+        messages.error(request, "Adres bulunamadı!")
+    
+    return redirect('address_list')
+
+@login_required(login_url='login')
+def track_shipment(request):
+    if request.method == "POST":
+        tracking_number = request.POST.get('tracking_number')
+        if tracking_number:
+            try:
+                order = Order.objects.get(tracking_number=tracking_number, user=request.user)
+                if order.status == 'shipped':
+                    import random
+                    import json
+                    
+                    lat = random.uniform(36.0, 42.0)
+                    lng = random.uniform(26.0, 45.0)
+                    
+                    shipment_data = {
+                        'tracking_number': tracking_number,
+                        'status': order.get_status_display(),
+                        'current_location': {
+                            'lat': lat,
+                            'lng': lng,
+                            'address': f"Kargo Merkezi - {random.choice(['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya'])}"
+                        },
+                        'estimated_delivery': '2-3 iş günü',
+                        'last_update': order.order_date.strftime('%d.%m.%Y %H:%M'),
+                        'route': [
+                            {'lat': 41.0082, 'lng': 28.9784, 'name': 'İstanbul Dağıtım Merkezi'},
+                            {'lat': lat, 'lng': lng, 'name': 'Yolda'},
+                            {'lat': 39.9334, 'lng': 32.8597, 'name': 'Teslimat Adresi'}
+                        ]
+                    }
+                    
+                    context = {
+                        'shipment_data': json.dumps(shipment_data),
+                        'order': order,
+                        'product_quantity': ProductQuantity(request),
+                    }
+                    return render(request, 'track_shipment.html', context)
+                else:
+                    messages.error(request, "Bu kargo henüz yola çıkmamış!")
+                    return redirect('track_shipment')
+            except Order.DoesNotExist:
+                messages.error(request, "Kargo takip numarası bulunamadı!")
+                return redirect('track_shipment')
+    
+    context = {
+        'product_quantity': ProductQuantity(request),
+    }
+    return render(request, 'track_shipment.html', context)
+
+@login_required(login_url='login')
+def add_comment(request, product_id):
+    if request.method == 'POST':
+        product = get_object_or_404(Product, id=product_id)
+        comment_text = request.POST.get('comment')
+        rating = request.POST.get('rating', 5)
+        
+        # Kullanıcının bu ürünü satın alıp almadığını kontrol et
+        has_purchased = OrderItem.objects.filter(
+            order__user=request.user,
+            product=product,
+            order__status='delivered'
+        ).exists()
+        
+        if not has_purchased:
+            messages.error(request, 'Bu ürünü satın almadığınız için yorum yapamazsınız.')
+            return redirect('product_detail', product_id=product_id)
+        
+        # Kullanıcının bu ürün için daha önce yorum yapıp yapmadığını kontrol et
+        existing_comment = Comment.objects.filter(user=request.user, product=product).first()
+        if existing_comment:
+            messages.error(request, 'Bu ürün için zaten yorum yapmışsınız.')
+            return redirect('product_detail', product_id=product_id)
+        
+        Comment.objects.create(
+            user=request.user,
+            product=product,
+            comment=comment_text,
+            rating=int(rating),
+            is_verified_purchase=True
+        )
+        
+        messages.success(request, 'Yorumunuz başarıyla eklendi.')
+        return redirect('product_detail', product_id=product_id)
+    
+    return redirect('product_detail', product_id=product_id)
+
+@login_required(login_url='login')
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+    
+    if request.method == 'POST':
+        comment_text = request.POST.get('comment')
+        rating = request.POST.get('rating', 5)
+        
+        comment.comment = comment_text
+        comment.rating = int(rating)
+        comment.save()
+        
+        messages.success(request, 'Yorumunuz başarıyla güncellendi.')
+        return redirect('product_detail', product_id=comment.product.id)
+    
+    context = {
+        'comment': comment,
+        'product_quantity': ProductQuantity(request),
+    }
+    return render(request, 'edit_comment.html', context)
+
+@login_required(login_url='login')
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+    product_id = comment.product.id
+    comment.delete()
+    
+    messages.success(request, 'Yorumunuz başarıyla silindi.')
+    return redirect('product_detail', product_id=product_id)
+
+def get_product_comments(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    comments = Comment.objects.filter(product=product).order_by('-create_date')
+    
+    comment_data = []
+    for comment in comments:
+        comment_data.append({
+            'id': comment.id,
+            'user': comment.user.username,
+            'comment': comment.comment,
+            'rating': comment.rating,
+            'create_date': comment.create_date.strftime('%d.%m.%Y'),
+            'is_verified_purchase': comment.is_verified_purchase,
+            'can_edit': request.user == comment.user,
+        })
+    
+    return JsonResponse({'comments': comment_data})

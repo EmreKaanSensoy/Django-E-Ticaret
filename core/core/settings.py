@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -66,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.static',
             ],
         },
     },
@@ -121,7 +121,7 @@ TIME_ZONE = 'UTC'
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATİC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -140,5 +140,5 @@ LOCALE_PATHS = [
     BASE_DIR / 'locale/',
 ]
 
-MODELTRANSLATION_DEFAULT_LANGUAGE = 'tr'
-MODELTRANSLATION_LANGUAGES = ('tr', 'en')
+# MODELTRANSLATION_DEFAULT_LANGUAGE = 'tr'
+# MODELTRANSLATION_LANGUAGES = ('tr', 'en')

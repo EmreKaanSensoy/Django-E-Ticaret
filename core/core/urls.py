@@ -31,6 +31,22 @@ urlpatterns = [
     path("favorite/", Favorites, name='favorite'),
     path("favorite/remove/<int:product_id>/", remove_favorite, name='remove-favorite'),
     path("favorite_toggle/<int:product_id>/", toggle_favorite, name='favorite-toggle'),
+    path("add_to_cart/<int:product_id>/", add_to_cart, name='add-to-cart'),
+    path("checkout/", checkout, name='checkout'),
+    path("order/<int:order_id>/", order_detail, name='order_detail'),
+    path("orders/", order_history, name='order_history'),
+    path("addresses/", address_list, name='address_list'),
+    path("address/add/", add_address, name='add_address'),
+    path("address/edit/<int:address_id>/", edit_address, name='edit_address'),
+    path("address/delete/<int:address_id>/", delete_address, name='delete_address'),
+    path("address/set-default/<int:address_id>/", set_default_address, name='set_default_address'),
+    path("track-shipment/", track_shipment, name='track_shipment'),
+    
+    # Yorum sistemi URL'leri
+    path("comment/add/<int:product_id>/", add_comment, name='add_comment'),
+    path("comment/edit/<int:comment_id>/", edit_comment, name='edit_comment'),
+    path("comment/delete/<int:comment_id>/", delete_comment, name='delete_comment'),
+    path("comment/get/<int:product_id>/", get_product_comments, name='get_product_comments'),
 
     #Authentication URLs
     path("login/", Login, name='login'),

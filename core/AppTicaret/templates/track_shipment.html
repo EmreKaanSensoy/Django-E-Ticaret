@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Page Header Start -->
+<div class="container-fluid page-header mb-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container">
+        <h1 class="display-3 mb-3 animated slideInDown">Kargom Nerede?</h1>
+        <nav aria-label="breadcrumb animated slideInDown">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a class="text-body" href="{% url 'index' %}">Ana Sayfa</a></li>
+                <li class="breadcrumb-item"><a class="text-body" href="{% url 'profile' %}">Profil</a></li>
+                <li class="breadcrumb-item text-dark active" aria-current="page">Kargo Takip</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<!-- Page Header End -->
+
+<!-- Track Shipment Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Kargo Takip</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form method="post" class="mb-4">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label for="tracking_number" class="form-label">Kargo Takip Numarası</label>
+                                    <input type="text" class="form-control" id="tracking_number" name="tracking_number" 
+                                           placeholder="TR1234567890" required>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-search"></i> Kargoyu Ara
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        {% if shipment_data %}
+                        <div class="shipment-info mb-4">
+                            <h5>Kargo Bilgileri</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Takip No:</strong> {{ order.tracking_number }}</p>
+                                    <p><strong>Durum:</strong> {{ order.get_status_display }}</p>
+                                    <p><strong>Tahmini Teslimat:</strong> <span id="estimated-delivery"></span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Son Güncelleme:</strong> <span id="last-update"></span></p>
+                                    <p><strong>Mevcut Konum:</strong> <span id="current-location"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Harita -->
+                        <div class="map-container mb-4">
+                            <div id="map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+                        </div>
+
+                        <!-- Kargo Durumu -->
+                        <div class="shipment-status">
+                            <h5>Kargo Durumu</h5>
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 75%;" 
+                                     aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">75%</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 text-center">
+                                    <div class="status-step completed">
+                                        <i class="fas fa-box"></i>
+                                        <p>Kargo Alındı</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="status-step completed">
+                                        <i class="fas fa-truck"></i>
+                                        <p>Yola Çıktı</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="status-step active">
+                                        <i class="fas fa-route"></i>
+                                        <p>Yolda</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="status-step">
+                                        <i class="fas fa-home"></i>
+                                        <p>Teslim Edildi</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Track Shipment End -->
+
+{% if shipment_data %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap" async defer></script>
+<script>
+    let map;
+    let marker;
+    let path;
+    let poly;
+    let animation;
+
+    function initMap() {
+        const shipmentData = {{ shipment_data|safe }};
+        
+        // Harita merkezi
+        const center = { 
+            lat: shipmentData.current_location.lat, 
+            lng: shipmentData.current_location.lng 
+        };
+        
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 8,
+            center: center,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+
+        // Rota çizgisi
+        const routeCoordinates = shipmentData.route.map(point => ({
+            lat: point.lat,
+            lng: point.lng
+        }));
+
+        poly = new google.maps.Polyline({
+            path: routeCoordinates,
+            strokeColor: '#FF0000',
+            strokeOpacity: 1.0,
+            strokeWeight: 3
+        });
+
+        poly.setMap(map);
+
+        // Başlangıç noktası
+        const startMarker = new google.maps.Marker({
+            position: routeCoordinates[0],
+            map: map,
+            title: shipmentData.route[0].name,
+            icon: {
+                url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
+            }
+        });
+
+        // Bitiş noktası
+        const endMarker = new google.maps.Marker({
+            position: routeCoordinates[routeCoordinates.length - 1],
+            map: map,
+            title: shipmentData.route[routeCoordinates.length - 1].name,
+            icon: {
+                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+            }
+        });
+
+        // Kargo aracı (hareket eden marker)
+        marker = new google.maps.Marker({
+            position: routeCoordinates[1],
+            map: map,
+            title: 'Kargo Aracı',
+            icon: {
+                url: 'https://maps.google.com/mapfiles/ms/icons/truck.png',
+                scaledSize: new google.maps.Size(32, 32)
+            }
+        });
+
+        // Animasyon
+        let i = 1;
+        function animateMarker() {
+            if (i < routeCoordinates.length) {
+                const latLng = routeCoordinates[i];
+                marker.setPosition(latLng);
+                i++;
+                setTimeout(animateMarker, 2000);
+            }
+        }
+
+        // Animasyonu başlat
+        setTimeout(animateMarker, 1000);
+
+        // Bilgileri güncelle
+        document.getElementById('estimated-delivery').textContent = shipmentData.estimated_delivery;
+        document.getElementById('last-update').textContent = shipmentData.last_update;
+        document.getElementById('current-location').textContent = shipmentData.current_location.address;
+    }
+</script>
+{% endif %}
+
+<style>
+.status-step {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.status-step.completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-step.active {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-step i {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.map-container {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+</style>
+{% endblock %} 

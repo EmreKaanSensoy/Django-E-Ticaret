@@ -202,7 +202,7 @@
                 {% for product in products %}
                 <div class="col-4 mb-4">
                     <div class="card" style="width: 100%; position: relative;">
-                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.model }}">
+                                                 <img src="{{ product.primary_image.url }}" class="card-img-top" alt="{{ product.model }}">
                         <form action="{% url 'favorite-toggle' product.id %}" method="post" style="position:absolute;top:10px;right:10px;z-index:2;display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn p-0 border-0 bg-transparent" title="Favorilere Ekle/Kaldır">
@@ -218,11 +218,15 @@
                             <p class="card-text">{{ product.model }}</p>
                             <p class="card-text">{{ product.price|intcomma }} ₺</p>
                             <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary w-100">{% trans 'Detaya Git' %}</a>
-                            <form method="post">
-                                {% csrf_token %}
-                                <input type="hidden" value="{{ product.id }}" name="product_id">
-                                <button type="submit" class="btn btn-primary">{% trans 'Sepete Ekle' %}</button>
-                            </form>
+                            {% if user.is_authenticated %}
+                                <form action="{% url 'add-to-cart' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-primary">{% trans 'Sepete Ekle' %}</button>
+                                </form>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-primary">{% trans 'Sepete Ekle' %}</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

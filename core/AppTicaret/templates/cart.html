@@ -29,7 +29,7 @@
                 <tr>
                     <!-- Ürün Görseli -->
                     <td class="text-center">
-                        <img src="{{ product.product.image.url }}" alt="Ürün" width="80" class="img-fluid rounded">
+                                                 <img src="{{ product.product.primary_image.url }}" alt="Ürün" width="80" class="img-fluid rounded">
                     </td>
                     
                     <!-- Marka -->
@@ -90,8 +90,7 @@
                         <p class="mb-0 pe-4 text-dark">₺{{ total_price|intcomma }}</p>
                     </div>
 
-                        <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="submit" name="btncheck" value="checkbtn">Sepeti Onayla</button>
-                    </form>
+                                        <a href="{% url 'checkout' %}" class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4">Sepeti Onayla</a>
                 </div>
             </div>
         </div>
