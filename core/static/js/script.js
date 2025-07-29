@@ -104,6 +104,48 @@
         },
       }); 
 
+      var swiper = new Swiper(".product-children-swiper", {
+        slidesPerView: 4,
+        spaceBetween: 10,
+        pagination: {
+          el: "#children-watches .swiper-pagination",
+          clickable: true,
+        },
+        breakpoints: {
+          0: {
+            slidesPerView: 2,
+            spaceBetween: 20,
+          },
+          980: {
+            slidesPerView: 4,
+            spaceBetween: 20,
+          }
+        },
+      }); 
+
+      var swiper = new Swiper(".product-unisex-swiper", {
+        slidesPerView: 3,
+        spaceBetween: 15,
+        pagination: {
+          el: "#unisex-watches .swiper-pagination",
+          clickable: true,
+        },
+        breakpoints: {
+          0: {
+            slidesPerView: 1,
+            spaceBetween: 20,
+          },
+          768: {
+            slidesPerView: 2,
+            spaceBetween: 20,
+          },
+          980: {
+            slidesPerView: 3,
+            spaceBetween: 20,
+          }
+        },
+      }); 
+
       var swiper = new Swiper(".testimonial-swiper", {
         loop: true,
         navigation: {

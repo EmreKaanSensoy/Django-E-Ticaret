@@ -53,22 +53,22 @@
               </div>
               <div class="col-lg-2 col-sm-6 pb-3">
                 <div class="footer-menu text-uppercase">
-                  <h5 class="widget-title pb-2">{% trans 'Quick Links' %}</h5>
+                  <h5 class="widget-title pb-2">{% trans 'Hızlı Linkler' %}</h5>
                   <ul class="menu-list list-unstyled text-uppercase">
                     <li class="menu-item pb-2">
-                      <a href="{% url 'index' %}">{% trans 'Home' %}</a>
+                      <a href="{% url 'index' %}">{% trans 'Anasayfa' %}</a>
                     </li>
                     <li class="menu-item pb-2">
-                      <a href="#">{% trans 'About' %}</a>
+                      <a href="{% url 'category' %}">{% trans 'Tüm Ürünler' %}</a>
                     </li>
                     <li class="menu-item pb-2">
-                      <a href="{% url 'category' %}">{% trans 'Shop' %}</a>
+                      <a href="{% url 'category' %}?gender=2">{% trans 'Kadın Saat' %}</a>
                     </li>
                     <li class="menu-item pb-2">
-                      <a href="#">{% trans 'Blogs' %}</a>
+                      <a href="{% url 'category' %}?gender=1">{% trans 'Erkek Saat' %}</a>
                     </li>
                     <li class="menu-item pb-2">
-                      <a href="#">{% trans 'Contact' %}</a>
+                      <a href="{% url 'category' %}?gender=3">{% trans 'Unisex Saat' %}</a>
                     </li>
                   </ul>
                 </div>

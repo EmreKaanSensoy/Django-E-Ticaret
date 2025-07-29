@@ -1026,3 +1026,20 @@ figure.instagram-item img.insta-image {
     background-position: right;
     background-repeat: no-repeat;
 }
+
+/* Unisex Watches - Single Card Styling */
+#unisex-watches .product-card {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+#unisex-watches .swiper-slide {
+    display: flex;
+    justify-content: center;
+}
+
+@media only screen and (max-width: 768px) {
+    #unisex-watches .product-card {
+        max-width: 250px;
+    }
+}

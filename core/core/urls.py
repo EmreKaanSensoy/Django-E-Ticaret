@@ -53,6 +53,8 @@ urlpatterns = [
     path("register/", Register, name='register'),
     path("logout/", Logout, name='logout'),
     
+
+    
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns = [

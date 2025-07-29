@@ -9,6 +9,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import Product, CartProduct, Profile, Address, Favorite, Comment, Order, OrderItem, Brand, Gender, Color, CaseShape, StrapType, GlassFeature, Style, Mechanism
+
 from django.db.models import Q, Sum, Avg
 from django.core.paginator import Paginator
 from django.contrib.auth import update_session_auth_hash
@@ -298,13 +299,26 @@ def Register(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
 
+        if not first_name or not last_name or not email or not password:
+            messages.error(request, "Lütfen tüm alanları doldurun.")
+            return render(request, 'user/register.html')
+
         if not User.objects.filter(email=email).exists():
-            user = User.objects.create_user(username=email, first_name=first_name,last_name=last_name,email=email, password=password)
-            user.save()
-            login(request, user)
-            return redirect('index')
+            try:
+                user = User.objects.create_user(username=email, first_name=first_name, last_name=last_name, email=email, password=password)
+                user.is_active = True
+                user.save()
+                
+                profile = Profile.objects.create(user=user)
+                
+                # Kullanıcıyı otomatik giriş yap
+                login(request, user)
+                messages.success(request, 'Hesabınız başarıyla oluşturuldu!')
+                return redirect('index')
+            except Exception as e:
+                messages.error(request, f"Kayıt sırasında bir hata oluştu: {e}")
         else:
-            messages.error(request, "Bu E-Posta Adresi Kayıtlı Değil")
+            messages.error(request, "Bu E-Posta Adresi Zaten Kayıtlı")
 
     return render(request, 'user/register.html')
 
@@ -714,3 +728,4 @@ def get_product_comments(request, product_id):
         })
     
     return JsonResponse({'comments': comment_data})
+

@@ -40,7 +40,7 @@
                             <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '1' %}active{% endif %}" href="#man-watches">{% trans 'Erkek Saat' %}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '3' %}active{% endif %}" href="#yearly-sale">{% trans 'Çocuk Saat' %}</a>
+                            <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '3' %}active{% endif %}" href="#yearly-sale">{% trans 'Unisex Saat' %}</a>
                         </li>
                         {% else %}
                         <!-- Menü Linkleri -->
@@ -57,7 +57,7 @@
                             <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '1' %}active{% endif %}" href="{% url 'category' %}?gender=1">{% trans 'Erkek Saat' %}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '3' %}active{% endif %}" href="{% url 'category' %}?gender=3">{% trans 'Çocuk Saat' %}</a>
+                            <a class="nav-link me-4 {% if request.path == '/category/' and request.GET.gender == '3' %}active{% endif %}" href="{% url 'category' %}?gender=3">{% trans 'Unisex Saat' %}</a>
                         </li>
 
                         {% endif %}
