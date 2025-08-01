@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+import uuid
+from django.utils import timezone
+from datetime import timedelta
 
 
 class Brand(models.Model):
@@ -283,6 +286,26 @@ class Order(models.Model):
         numbers = ''.join(random.choices(string.digits, k=10))
         return f"TR{numbers}"
     
+    def cancel_order(self):
+        """Siparişi iptal eder ve stokları geri verir"""
+        if self.status == 'cancelled':
+            return False  # Zaten iptal edilmiş
+        
+        # Stokları geri ver
+        for item in self.items.all():
+            product = item.product
+            product.stock += item.quantity
+            product.save()
+        
+        # Siparişi iptal et
+        self.status = 'cancelled'
+        self.save()
+        return True
+    
+    def can_cancel(self):
+        """Siparişin iptal edilip edilemeyeceğini kontrol eder"""
+        return self.status in ['pending', 'processing']
+    
     class Meta:
         verbose_name_plural = "Siparişler"
 
@@ -302,4 +325,21 @@ class OrderItem(models.Model):
     
     class Meta:
         verbose_name_plural = "Sipariş Ürünleri"
+
+
+class EmailVerification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"{self.user.email} - {'Doğrulandı' if self.is_verified else 'Doğrulanmadı'}"
+    
+    def is_expired(self):
+        """Token'ın 7 gün içinde geçerli olup olmadığını kontrol eder"""
+        return timezone.now() > self.created_at + timedelta(days=7)
+    
+    class Meta:
+        verbose_name_plural = "Email Doğrulamaları"
 

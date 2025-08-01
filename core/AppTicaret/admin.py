@@ -9,12 +9,13 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['brand', 'model', 'price', 'stock', 'stock_status', 'gender', 'color', 'image_count']
+    list_display = ['brand', 'model', 'price', 'stock', 'stock_status', 'is_in_stock', 'gender', 'color', 'image_count']
     list_filter = ['brand', 'gender', 'color', 'case_shape', 'strap_type', 'stock']
     search_fields = ['brand__brand', 'model', 'description']
     ordering = ['brand', 'model']
     inlines = [ProductImageInline]
     list_editable = ['stock']
+    actions = ['update_stock_status']
     
     def image_count(self, obj):
         return obj.images.count()
@@ -28,6 +29,22 @@ class ProductAdmin(admin.ModelAdmin):
         else:
             return "Stokta Var"
     stock_status.short_description = 'Stok Durumu'
+    
+    def is_in_stock(self, obj):
+        return obj.is_in_stock
+    is_in_stock.boolean = True
+    is_in_stock.short_description = 'Stokta Var'
+    
+    def update_stock_status(self, request, queryset):
+        updated_count = 0
+        for product in queryset:
+            if product.stock == 0:
+                product.stock = 10  # Örnek: Stok ekle
+                product.save()
+                updated_count += 1
+        
+        self.message_user(request, f"{updated_count} ürünün stok durumu güncellendi.")
+    update_stock_status.short_description = "Seçili ürünlere stok ekle"
 
 admin.site.register(CartProduct)
 admin.site.register(Profile)
@@ -100,14 +117,42 @@ class MechanismAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'order_date', 'total_amount', 'status']
+    list_display = ['id', 'user', 'order_date', 'total_amount', 'status', 'can_cancel']
     list_filter = ['status', 'order_date']
     search_fields = ['user__username', 'user__email', 'id']
     readonly_fields = ['order_date']
     ordering = ['-order_date']
+    actions = ['cancel_selected_orders']
+    
+    def can_cancel(self, obj):
+        return obj.can_cancel()
+    can_cancel.boolean = True
+    can_cancel.short_description = 'İptal Edilebilir'
+    
+    def cancel_selected_orders(self, request, queryset):
+        cancelled_count = 0
+        for order in queryset:
+            if order.cancel_order():
+                cancelled_count += 1
+        
+        self.message_user(request, f"{cancelled_count} sipariş başarıyla iptal edildi.")
+    cancel_selected_orders.short_description = "Seçili siparişleri iptal et"
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ['order', 'product', 'quantity', 'price']
     list_filter = ['order__status']
     search_fields = ['order__id', 'product__model']
+
+@admin.register(EmailVerification)
+class EmailVerificationAdmin(admin.ModelAdmin):
+    list_display = ['user', 'created_at', 'is_verified', 'is_expired']
+    list_filter = ['is_verified', 'created_at']
+    search_fields = ['user__username', 'user__email']
+    readonly_fields = ['token', 'created_at']
+    ordering = ['-created_at']
+    
+    def is_expired(self, obj):
+        return obj.is_expired()
+    is_expired.boolean = True
+    is_expired.short_description = 'Süresi Dolmuş'

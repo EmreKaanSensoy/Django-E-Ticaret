@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Product, CartProduct, Profile, Address, Favorite, Comment, Order, OrderItem, Brand, Gender, Color, CaseShape, StrapType, GlassFeature, Style, Mechanism
+from .models import Product, CartProduct, Profile, Address, Favorite, Comment, Order, OrderItem, Brand, Gender, Color, CaseShape, StrapType, GlassFeature, Style, Mechanism, EmailVerification
 
 from django.db.models import Q, Sum, Avg
 from django.core.paginator import Paginator
@@ -16,6 +16,9 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 import json
 
 def ProductQuantity(request):
@@ -284,6 +287,11 @@ def Login(request):
             user = User.objects.get(email=email)
             if user.check_password(password):
                 if user is not None:
+                    # Email doğrulanmış mı kontrol et
+                    if not user.is_active:
+                        messages.error(request, "Hesabınız henüz doğrulanmamış. Lütfen email adresinizi kontrol edin.")
+                        return render(request, 'user/login.html')
+                    
                     login(request, user)
                     return redirect('index')
             else:
@@ -306,15 +314,19 @@ def Register(request):
         if not User.objects.filter(email=email).exists():
             try:
                 user = User.objects.create_user(username=email, first_name=first_name, last_name=last_name, email=email, password=password)
-                user.is_active = True
+                user.is_active = False  # Email doğrulana kadar aktif değil
                 user.save()
                 
                 profile = Profile.objects.create(user=user)
                 
-                # Kullanıcıyı otomatik giriş yap
-                login(request, user)
-                messages.success(request, 'Hesabınız başarıyla oluşturuldu!')
-                return redirect('index')
+                # Email doğrulama kaydı oluştur
+                verification = EmailVerification.objects.create(user=user)
+                
+                # Doğrulama emaili gönder
+                send_verification_email(user, verification)
+                
+                messages.success(request, 'Hesabınız başarıyla oluşturuldu! Lütfen email adresinizi doğrulayın.')
+                return redirect('login')
             except Exception as e:
                 messages.error(request, f"Kayıt sırasında bir hata oluştu: {e}")
         else:
@@ -438,12 +450,25 @@ def checkout(request):
             shipping_address=address
         )
         
+        # Stok kontrolü ve azaltma
         for cart_product in cart_products:
+            product = cart_product.product
+            
+            # Stok kontrolü
+            if product.stock < cart_product.quantity:
+                messages.error(request, f"{product.model} için yeterli stok bulunmamaktadır! Mevcut stok: {product.stock}")
+                return redirect('cart')
+            
+            # Stok azaltma
+            product.stock -= cart_product.quantity
+            product.save()
+            
+            # Sipariş öğesi oluşturma
             OrderItem.objects.create(
                 order=order,
-                product=cart_product.product,
+                product=product,
                 quantity=cart_product.quantity,
-                price=cart_product.product.price
+                price=product.price
             )
         
         cart_products.delete()
@@ -728,4 +753,103 @@ def get_product_comments(request, product_id):
         })
     
     return JsonResponse({'comments': comment_data})
+
+def send_verification_email(user, verification):
+    """Email doğrulama linki gönderir"""
+    subject = 'Hesabınızı Doğrulayın'
+    
+    # Test için localhost URL kullan
+    verification_url = f"http://127.0.0.1:8000/verify-email/{verification.token}/"
+    
+    # Email template'ini render et
+    html_message = render_to_string('emails/verification_email.html', {
+        'user': user,
+        'verification': verification,
+        'verification_url': verification_url
+    })
+    
+    # HTML olmayan versiyonu
+    plain_message = strip_tags(html_message)
+    
+    # Email gönder
+    send_mail(
+        subject=subject,
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        html_message=html_message,
+        fail_silently=False,
+    )
+
+def verify_email(request, token):
+    """Email doğrulama token'ını kontrol eder"""
+    try:
+        verification = EmailVerification.objects.get(token=token, is_verified=False)
+        
+        # Token'ın süresi dolmuş mu kontrol et
+        if verification.is_expired():
+            messages.error(request, "Doğrulama linkinin süresi dolmuş. Lütfen yeni bir doğrulama emaili isteyin.")
+            return redirect('login')
+        
+        # Email'i doğrula
+        verification.is_verified = True
+        verification.save()
+        
+        # Kullanıcıyı aktif et
+        user = verification.user
+        user.is_active = True
+        user.save()
+        
+        messages.success(request, "Email adresiniz başarıyla doğrulandı! Artık giriş yapabilirsiniz.")
+        return redirect('login')
+        
+    except EmailVerification.DoesNotExist:
+        messages.error(request, "Geçersiz doğrulama linki.")
+        return redirect('login')
+
+def resend_verification_email(request):
+    """Email doğrulama linkini tekrar gönderir"""
+    if request.method == "POST":
+        email = request.POST.get('email')
+        
+        try:
+            user = User.objects.get(email=email)
+            
+            # Eski doğrulama kayıtlarını sil
+            EmailVerification.objects.filter(user=user).delete()
+            
+            # Yeni doğrulama kaydı oluştur
+            verification = EmailVerification.objects.create(user=user)
+            
+            # Email gönder
+            send_verification_email(user, verification)
+            
+            messages.success(request, "Doğrulama emaili tekrar gönderildi. Lütfen email kutunuzu kontrol edin.")
+            return redirect('login')
+            
+        except User.DoesNotExist:
+            messages.error(request, "Bu email adresi ile kayıtlı kullanıcı bulunamadı.")
+    
+    return render(request, 'user/resend_verification.html')
+
+@login_required(login_url='login')
+def cancel_order(request, order_id):
+    """Siparişi iptal eder"""
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+        
+        if not order.can_cancel():
+            messages.error(request, "Bu sipariş artık iptal edilemez!")
+            return redirect('order_detail', order_id=order.id)
+        
+        if order.cancel_order():
+            messages.success(request, "Siparişiniz başarıyla iptal edildi ve stoklar geri verildi.")
+        else:
+            messages.error(request, "Sipariş iptal edilemedi!")
+            
+        return redirect('order_detail', order_id=order.id)
+        
+    except Order.DoesNotExist:
+        messages.error(request, "Sipariş bulunamadı!")
+        return redirect('order_history')
 

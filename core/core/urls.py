@@ -34,6 +34,7 @@ urlpatterns = [
     path("add_to_cart/<int:product_id>/", add_to_cart, name='add-to-cart'),
     path("checkout/", checkout, name='checkout'),
     path("order/<int:order_id>/", order_detail, name='order_detail'),
+    path("order/<int:order_id>/cancel/", cancel_order, name='cancel_order'),
     path("orders/", order_history, name='order_history'),
     path("addresses/", address_list, name='address_list'),
     path("address/add/", add_address, name='add_address'),
@@ -53,6 +54,9 @@ urlpatterns = [
     path("register/", Register, name='register'),
     path("logout/", Logout, name='logout'),
     
+    # Email Verification URLs
+    path("verify-email/<uuid:token>/", verify_email, name='verify_email'),
+    path("resend-verification/", resend_verification_email, name='resend_verification'),
 
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

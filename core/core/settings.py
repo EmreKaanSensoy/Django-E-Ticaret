@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # YENİ
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -104,6 +105,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
@@ -142,4 +145,26 @@ LOCALE_PATHS = [
 
 # MODELTRANSLATION_DEFAULT_LANGUAGE = 'tr'
 # MODELTRANSLATION_LANGUAGES = ('tr', 'en')
+
+# Email Configuration - Gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'sensoyemrekaan61@gmail.com'  # Gmail adresinizi buraya yazın
+EMAIL_HOST_PASSWORD = 'gnqv yfmt fake qecz'  # Gmail uygulama şifrenizi buraya yazın
+DEFAULT_FROM_EMAIL = 'sensoyemrekaan61@gmail.com'
+
+# Test için Console Backend (Geçici)
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Email Verification Settings
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 7
+
+# Site Settings
+SITE_ID = 1
 

@@ -86,6 +86,18 @@
                 </div>
             </div>
 
+            <!-- İptal Butonu -->
+            {% if order.can_cancel %}
+            <div class="text-center mt-3">
+                <form method="post" action="{% url 'cancel_order' order.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Siparişi iptal etmek istediğinizden emin misiniz?')">
+                        Siparişi İptal Et
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+
             <!-- Geri Dön Butonu -->
             <div class="text-center mt-4">
                 <a href="{% url 'order_history' %}" class="btn btn-primary">Sipariş Geçmişine Dön</a>

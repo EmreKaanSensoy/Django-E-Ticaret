@@ -18,6 +18,10 @@
                     <input type="password" class="form-control" id="exampleFormControlInput1" placeholder="*********" name="password">
                 </div>
                 <button type="submit" class="btn btn-primary d-block ms-auto">{% trans 'Giriş Yap' %}</button>
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'resend_verification' %}" class="btn btn-link">Email Doğrulama Linkini Tekrar Gönder</a>
+                </div>
             </div>
         </form>
 
